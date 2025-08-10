@@ -179,7 +179,7 @@ class MigrationVersion extends BaseCommand
         }
     }
 
-    protected function showHelp()
+    function showHelp()
     {
         CLI::write('Available actions:', 'green');
         CLI::write('  show    - Show current version information');
