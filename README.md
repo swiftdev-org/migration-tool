@@ -392,8 +392,8 @@ class CreateUsersTable extends Migration
 ## Best Practices
 
 ### Understanding the Options
+- **`--version x.x.x and --major/minor/patch`**: Creates new versions - use when beginning development  
 - **`--update`**: Modifies current version - use during active development
-- **`--major/minor/patch`**: Creates new versions - use for releases and milestones  
 - **`--reset`**: Nuclear option - deletes everything and starts fresh
 
 ### Version Numbering
@@ -408,8 +408,9 @@ class CreateUsersTable extends Migration
 - Automatically generates proper rollback logic in `down()` methods
 
 ### Development Workflow
-- Use version increments (`--major`, `--minor`, `--patch`) to begin developing a new version
-- Use `--update` during active development to refine the current version
+- Specify version (`--version x.x.x`) when beginning a project (defaults to 1.0.0 if not specified)
+- Use version increments (`--major`, `--minor`, `--patch`) to begin developing a new release
+- Use `--update` during active development to refine the current release
 - Use `--reset` sparingly when you need to completely restructure
 - Always backup before running migrations
 - Test migrations in development environment first
