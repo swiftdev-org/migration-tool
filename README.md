@@ -15,7 +15,7 @@ A comprehensive set of Spark commands for generating and managing database migra
 
 ## Installation
 
-### Composer Install (coming soon)
+### 1. Composer Install (coming soon)
 
 1. Copy the command files to your CodeIgniter 4 application:
 
@@ -23,7 +23,7 @@ A comprehensive set of Spark commands for generating and managing database migra
 composer require swiftdev-org/migration-tool
 ```
 
-### Manual Install
+### 2. Manual Install
 
 1. Extract the files to your CodeIgniter 4 application:
 
