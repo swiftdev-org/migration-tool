@@ -6,6 +6,7 @@ A comprehensive set of Spark commands for generating and managing database migra
 - 🏷️ **Semantic Versioning** - Uses standard software versioning (1.0.0, 1.1.0, 2.0.0)
 - 🔄 **Regeneration Support** - Rebuild current version when schema changes
 - 📊 **Schema Analysis** - Automatically detects tables, fields, indexes, and foreign keys
+- 🔍 **Smart Change Detection** - Only includes actual schema differences in update migrations
 - 📝 **Version History** - Track all migration versions with timestamps and descriptions
 - 🎯 **Selective Generation** - Generate migrations for specific tables
 - 🔍 **Status Monitoring** - View current version and migration status
