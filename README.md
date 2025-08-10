@@ -3,15 +3,117 @@
 A comprehensive set of Spark commands for generating and managing database migrations with semantic versioning support. This tool automatically creates migration files from your existing database schema and provides advanced version management capabilities.
 
 ## Features
+
 - 🏷️ **Semantic Versioning** - Uses standard software versioning (1.0.0, 1.1.0, 2.0.0)
-- 🔄 **Regeneration Support** - Rebuild current version when schema changes
-- 📊 **Schema Analysis** - Automatically detects tables, fields, indexes, and foreign keys
+- 🔄 **Smart Update System** - Update current version or create new versions intelligently
 - 🔍 **Smart Change Detection** - Only includes actual schema differences in update migrations
+- 📊 **Schema Analysis** - Automatically detects tables, fields, indexes, and foreign keys
 - 📝 **Version History** - Track all migration versions with timestamps and descriptions
 - 🎯 **Selective Generation** - Generate migrations for specific tables
 - 🔍 **Status Monitoring** - View current version and migration status
+- 🚀 **Reset Capability** - Complete migration reset for major restructuring
+
+## Installation
+
+1. Copy the command files to your CodeIgniter 4 application:
+
+```
+app/Commands/
+├── GenerateMigration.php
+├── MigrationVersion.php
+└── MigrationStatus.php
+```
+
+2. Ensure your `app/Database/Migrations/` directory exists and is writable
+
+3. The commands will be automatically available via Spark CLI
+
+## Commands Overview
+
+| Command | Description |
+|---------|-------------|
+| `db:generate-migration` | Generate migration files from database schema |
+| `db:migration-version` | Manage migration versions |
+| `db:migration-status` | Show migration status and version info |
+
+## Core Operations
+
+### 1. **Update Current Version** (`--update`)
+Modifies the current migration version with detected changes. Perfect for active development.
+
+```bash
+# Update current version with detected changes
+php spark db:generate-migration --update
+
+# Update with custom description
+php spark db:generate-migration --update --description="Fixed user table constraints"
+
+# Update specific table only
+php spark db:generate-migration --update --table=users
+```
+
+**What it does:**
+- Compares current database with existing migration files
+- Overwrites current version files with detected changes
+- Keeps the same version number
+- Shows detailed change detection output
+
+### 2. **Create New Version** (Version Increments)
+Creates a new migration version with detected changes. Perfect for releases and milestones.
+
+```bash
+# Major version (breaking changes): 1.0.0 -> 2.0.0
+php spark db:generate-migration --major --description="Complete API redesign"
+
+# Minor version (new features): 1.0.0 -> 1.1.0
+php spark db:generate-migration --minor --description="Added user preferences"
+
+# Patch version (bug fixes): 1.0.0 -> 1.0.1
+php spark db:generate-migration --patch --description="Fixed email validation"
+
+# Custom version
+php spark db:generate-migration --version=2.5.0 --description="Special release"
+```
+
+**What it does:**
+- Creates new version files
+- Preserves existing migration files
+- Increments version number as specified
+- Generates migrations with only detected changes
+
+### 3. **Reset All Migrations** (`--reset`)
+Nuclear option: deletes all migrations and starts fresh. Use with caution!
+
+```bash
+# Reset to v1.0.0 (with confirmation prompt)
+php spark db:generate-migration --reset
+
+# Reset with custom version
+php spark db:generate-migration --reset --version=2.0.0 --description="Complete redesign"
+```
+
+**What it does:**
+- Deletes ALL existing migration files
+- Requires confirmation before proceeding
+- Recreates complete table structures from current database
+- Resets version history
+
+## Command Options
+
+| Option | Description |
+|--------|-------------|
+| `--table` | Generate migration for specific table only |
+| `--update` | Update current migration version with detected changes (overwrites existing) |
+| `--version` | Specify exact version (e.g., 1.2.0) |
+| `--major` | Increment major version (breaking changes) |
+| `--minor` | Increment minor version (new features) |
+| `--patch` | Increment patch version (bug fixes) |
+| `--reset` | Delete all previous migrations and start fresh with specified version |
+| `--force` | Force overwrite existing migration files |
+| `--description` | Add custom description for this migration version |
 
 ## Smart Schema Change Detection
+
 The system intelligently compares your current database schema with the previous migration files to detect only actual changes:
 
 ### Detected Changes Include:
@@ -22,12 +124,12 @@ The system intelligently compares your current database schema with the previous
 - **Table Changes**: New tables, dropped tables
 
 ### Change Detection Output:
-When running update migrations, you'll see detailed output about what changes were detected:
+When running migrations, you'll see detailed output about what changes were detected:
 
 ```bash
 php spark db:generate-migration --minor --description="Added user preferences"
 
-Generating update migration v1.2.0 by comparing database schema...
+Generating new migration v1.2.0 by comparing database schema...
 Description: Added user preferences
   └─ Changes detected for users:
     ├─ Added fields: preferences, avatar_url
@@ -36,10 +138,11 @@ Description: Added user preferences
     └─ Primary key changed: user_id → id
   └─ New table detected: user_preferences
 No changes detected for table: posts
-Update migration v1.2.0 generation completed!
+New migration v1.2.0 generation completed!
 ```
 
 ### Generated Update Migrations
+
 Instead of recreating entire tables, update migrations contain only the specific changes:
 
 ```php
@@ -95,85 +198,40 @@ public function down()
 }
 ```
 
-## Installation
-1. Copy the command files to your CodeIgniter 4 application:
+## Usage Patterns
 
-```
-app/Commands/
-├── GenerateMigration.php
-├── MigrationVersion.php
-└── MigrationStatus.php
-```
+### Development Workflow
 
-2. Ensure your `app/Database/Migrations/` directory exists and is writable
-
-3. The commands will be automatically available via Spark CLI
-
-## Commands Overview
-
-| Command | Description |
-|---------|-------------|
-| `db:generate-migration` | Generate migration files from database schema |
-| `db:migration-version` | Manage migration versions |
-| `db:migration-status` | Show migration status and version info |
-
-## Usage
-
-### Generate Initial Migration
-Create your first migration from existing database schema:
-
+#### Option 1: Update Current Version (Recommended for Active Development)
 ```bash
-# Generate v1.0.0 migration for all tables
-php spark db:generate-migration --version=1.0.0
+# Start with initial version
+php spark db:generate-migration --version=1.0.0 --description="Initial schema"
 
-# Generate for specific table only
-php spark db:generate-migration --version=1.0.0 --table=users
+# Make database changes, then update current version
+php spark db:generate-migration --update --description="Added user preferences"
+
+# Continue making changes and updating same version
+php spark db:generate-migration --update --description="Added social features"
+
+# When ready for release, create new version
+php spark db:generate-migration --minor --description="User management v1.1.0 ready"
 ```
 
-### Version Management
-
-#### Auto-increment Versions
-
+#### Option 2: Create New Versions for Each Change
 ```bash
-# Major version (breaking changes): 1.0.0 -> 2.0.0
-php spark db:generate-migration --major
+# Initial version
+php spark db:generate-migration --version=1.0.0 --description="Initial schema"
 
-# Minor version (new features): 1.0.0 -> 1.1.0
-php spark db:generate-migration --minor
-
-# Patch version (bug fixes): 1.0.0 -> 1.0.1
-php spark db:generate-migration --patch
-
-# Default behavior (minor increment)
-php spark db:generate-migration
+# Each change gets a new version
+php spark db:generate-migration --patch --description="Fixed email constraints"
+php spark db:generate-migration --minor --description="Added user preferences"
+php spark db:generate-migration --patch --description="Fixed index performance"
 ```
 
-#### Custom Versions with Descriptions
-
+#### Option 3: Complete Reset (Nuclear Option)
 ```bash
-# Set specific version with description
-php spark db:generate-migration --version=2.5.0 --description="Added user authentication system"
-
-# Generate update migration with custom description
-php spark db:generate-migration --update --minor --description="Added email verification feature"
-```
-
-### Regenerate Current Version
-
-When your database schema changes but you want to keep the same version:
-
-```bash
-# Regenerate all tables for current version
-php spark db:generate-migration --regenerate
-
-# Regenerate with custom description
-php spark db:generate-migration --regenerate --description="Updated user table structure"
-
-# Regenerate specific table
-php spark db:generate-migration --regenerate --table=users
-
-# Force overwrite existing files
-php spark db:generate-migration --regenerate --force
+# When you want to completely start over
+php spark db:generate-migration --reset --version=2.0.0 --description="Complete redesign"
 ```
 
 ### Version Management Commands
@@ -198,31 +256,6 @@ php spark db:migration-version list
 # View comprehensive migration status
 php spark db:migration-status
 ```
-
-## Command Options
-
-### `db:generate-migration`
-
-| Option | Description |
-|--------|-------------|
-| `--table` | Generate migration for specific table only |
-| `--update` | Generate update migration by comparing schemas |
-| `--version` | Specify exact version (e.g., 1.2.0) |
-| `--major` | Increment major version (breaking changes) |
-| `--minor` | Increment minor version (new features) |
-| `--patch` | Increment patch version (bug fixes) |
-| `--regenerate` | Regenerate current version (overwrites existing) |
-| `--force` | Force overwrite existing migration files |
-| `--description` | Add custom description for this migration version |
-
-### `db:migration-version`
-
-| Action | Description |
-|--------|-------------|
-| `show` | Display current version information |
-| `set --version=X.Y.Z --description="desc"` | Manually set version with description |
-| `history` | Show complete version history |
-| `list` | List all migration files by version |
 
 ## File Structure
 
@@ -328,51 +361,14 @@ class CreateUsersTable extends Migration
 }
 ```
 
-## Workflow Examples
+### `db:migration-version`
 
-### Starting a New Project
-
-```bash
-# 1. Generate initial migration from existing database
-php spark db:generate-migration --version=1.0.0
-
-# 2. Check status
-php spark db:migration-status
-
-# 3. Run migrations
-php spark migrate
-```
-
-### Adding New Features
-
-```bash
-# 1. Make database changes manually (add columns, indexes, etc.)
-# 2. Generate update migration with description
-php spark db:generate-migration --minor --description="Added user profile fields and preferences"
-
-# Output will show exactly what changes were detected:
-# └─ Changes detected for users:
-#   ├─ Added fields: bio, location, website
-#   └─ Added indexes: website (INDEX)
-
-# 3. Check what was generated
-php spark db:migration-version list
-
-# 4. Run new migrations
-php spark migrate
-```
-
-### Schema Changes During Development
-
-```bash
-# 1. Modify database schema
-# 2. Regenerate current version with description
-php spark db:generate-migration --regenerate --description="Fixed column types and added indexes"
-
-# 3. Reset and re-run migrations
-php spark migrate:reset
-php spark migrate
-```
+| Action | Description |
+|--------|-------------|
+| `show` | Display current version information |
+| `set --version=X.Y.Z --description="desc"` | Manually set version with description |
+| `history` | Show complete version history |
+| `list` | List all migration files by version |
 
 ## Supported Database Features
 
@@ -395,29 +391,34 @@ php spark migrate
 
 ## Best Practices
 
-### Development Best Practices
+### Understanding the Options
+- **`--update`**: Modifies current version - use during active development
+- **`--major/minor/patch`**: Creates new versions - use for releases and milestones  
+- **`--reset`**: Nuclear option - deletes everything and starts fresh
 
-#### Schema Change Detection
+### Version Numbering
+- **Major (X.0.0)**: Breaking changes, incompatible schema changes
+- **Minor (X.Y.0)**: New features, backward-compatible additions
+- **Patch (X.Y.Z)**: Bug fixes, small corrections
+
+### Schema Change Detection
 - The system compares current database state with previous migration files
 - Only actual differences are included in update migrations
 - Supports incremental schema evolution without recreating entire tables
 - Automatically generates proper rollback logic in `down()` methods
 
-#### Version Numbering
-- **Major (X.0.0)**: Breaking changes, incompatible schema changes
-- **Minor (X.Y.0)**: New features, backward-compatible additions
-- **Patch (X.Y.Z)**: Bug fixes, small corrections
-
 ### Development Workflow
-1. Use `--regenerate` during active development
-2. Use version increments for releases
-3. Always backup before running migrations
-4. Test migrations in development environment first
+- Use `--update` during active development to refine the current version
+- Use version increments (`--major`, `--minor`, `--patch`) for releases
+- Use `--reset` sparingly when you need to completely restructure
+- Always backup before running migrations
+- Test migrations in development environment first
 
 ### File Management
 - Keep migration files in version control
-- Don't manually edit generated files
+- Don't manually edit generated files  
 - Use `--force` carefully to avoid losing custom changes
+- Always backup before using `--reset`
 
 ## Troubleshooting
 
@@ -433,7 +434,7 @@ php spark db:generate-migration --update
 **"Migration file already exists"**
 ```bash
 # Use --force to overwrite
-php spark db:generate-migration --regenerate --force
+php spark db:generate-migration --update --force
 ```
 
 **"Invalid version format"**
@@ -443,7 +444,7 @@ php spark db:generate-migration --version=1.2.3  # ✓ Correct
 php spark db:generate-migration --version=v1.2   # ✗ Invalid
 ```
 
-**"No version file found"**
+**"No current version found"**
 ```bash
 # Initialize with first version
 php spark db:migration-version set --version=1.0.0
