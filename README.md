@@ -3,7 +3,6 @@
 A comprehensive set of Spark commands for generating and managing database migrations with semantic versioning support. This tool automatically creates migration files from your existing database schema and provides advanced version management capabilities.
 
 ## Features
-
 - 🏷️ **Semantic Versioning** - Uses standard software versioning (1.0.0, 1.1.0, 2.0.0)
 - 🔄 **Regeneration Support** - Rebuild current version when schema changes
 - 📊 **Schema Analysis** - Automatically detects tables, fields, indexes, and foreign keys
@@ -11,8 +10,91 @@ A comprehensive set of Spark commands for generating and managing database migra
 - 🎯 **Selective Generation** - Generate migrations for specific tables
 - 🔍 **Status Monitoring** - View current version and migration status
 
-## Installation
+## Smart Schema Change Detection
+The system intelligently compares your current database schema with the previous migration files to detect only actual changes:
 
+### Detected Changes Include:
+- **Field Changes**: New fields, modified field types/constraints, removed fields
+- **Index Changes**: Added/removed indexes and unique constraints
+- **Primary Key Changes**: Modified primary key definitions
+- **Foreign Key Changes**: Added/removed foreign key relationships
+- **Table Changes**: New tables, dropped tables
+
+### Change Detection Output:
+When running update migrations, you'll see detailed output about what changes were detected:
+
+```bash
+php spark db:generate-migration --minor --description="Added user preferences"
+
+Generating update migration v1.2.0 by comparing database schema...
+Description: Added user preferences
+  └─ Changes detected for users:
+    ├─ Added fields: preferences, avatar_url
+    ├─ Modified fields: email
+    ├─ Added indexes: email (UNIQUE)
+    └─ Primary key changed: user_id → id
+  └─ New table detected: user_preferences
+No changes detected for table: posts
+Update migration v1.2.0 generation completed!
+```
+
+### Generated Update Migrations
+Instead of recreating entire tables, update migrations contain only the specific changes:
+
+```php
+public function up()
+{
+    // Update table structure for users
+
+    // Add new fields
+    $this->forge->addColumn($this->tableName, [
+        'preferences' => [
+            'type' => 'JSON',
+            'null' => true,
+        ],
+        'avatar_url' => [
+            'type' => 'VARCHAR',
+            'constraint' => 255,
+            'null' => true,
+        ]
+    ]);
+
+    // Modify existing fields
+    $this->forge->modifyColumn($this->tableName, [
+        'email' => [
+            'type' => 'VARCHAR',
+            'constraint' => 320,
+            'null' => false,
+        ]
+    ]);
+
+    // Add new indexes
+    $this->forge->addUniqueKey('email');
+}
+
+public function down()
+{
+    // Revert the changes made in up() method for users
+
+    // Remove added indexes
+    $this->db->query('ALTER TABLE {$this->tableName} DROP INDEX email');
+
+    // Restore original field definitions
+    $this->forge->modifyColumn($this->tableName, [
+        'email' => [
+            'type' => 'VARCHAR',
+            'constraint' => 255,
+            'null' => false,
+        ]
+    ]);
+
+    // Remove added fields
+    $this->forge->dropColumn($this->tableName, 'preferences');
+    $this->forge->dropColumn($this->tableName, 'avatar_url');
+}
+```
+
+## Installation
 1. Copy the command files to your CodeIgniter 4 application:
 
 ```
@@ -37,7 +119,6 @@ app/Commands/
 ## Usage
 
 ### Generate Initial Migration
-
 Create your first migration from existing database schema:
 
 ```bash
@@ -264,9 +345,14 @@ php spark migrate
 ### Adding New Features
 
 ```bash
-# 1. Make database changes manually
+# 1. Make database changes manually (add columns, indexes, etc.)
 # 2. Generate update migration with description
 php spark db:generate-migration --minor --description="Added user profile fields and preferences"
+
+# Output will show exactly what changes were detected:
+# └─ Changes detected for users:
+#   ├─ Added fields: bio, location, website
+#   └─ Added indexes: website (INDEX)
 
 # 3. Check what was generated
 php spark db:migration-version list
@@ -308,7 +394,15 @@ php spark migrate
 
 ## Best Practices
 
-### Version Numbering
+### Development Best Practices
+
+#### Schema Change Detection
+- The system compares current database state with previous migration files
+- Only actual differences are included in update migrations
+- Supports incremental schema evolution without recreating entire tables
+- Automatically generates proper rollback logic in `down()` methods
+
+#### Version Numbering
 - **Major (X.0.0)**: Breaking changes, incompatible schema changes
 - **Minor (X.Y.0)**: New features, backward-compatible additions
 - **Patch (X.Y.Z)**: Bug fixes, small corrections
@@ -327,6 +421,13 @@ php spark migrate
 ## Troubleshooting
 
 ### Common Issues
+
+**"No changes detected"**
+```bash
+# When no actual schema differences are found
+php spark db:generate-migration --update
+# Output: No schema changes detected.
+```
 
 **"Migration file already exists"**
 ```bash
