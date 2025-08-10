@@ -408,8 +408,8 @@ class CreateUsersTable extends Migration
 - Automatically generates proper rollback logic in `down()` methods
 
 ### Development Workflow
+- Use version increments (`--major`, `--minor`, `--patch`) to begin developing a new version
 - Use `--update` during active development to refine the current version
-- Use version increments (`--major`, `--minor`, `--patch`) for releases
 - Use `--reset` sparingly when you need to completely restructure
 - Always backup before running migrations
 - Test migrations in development environment first
