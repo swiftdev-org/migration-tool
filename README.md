@@ -66,14 +66,14 @@ php spark db:generate-migration --patch
 php spark db:generate-migration
 ```
 
-#### Custom Versions
+#### Custom Versions with Descriptions
 
 ```bash
-# Set specific version
-php spark db:generate-migration --version=2.5.0
+# Set specific version with description
+php spark db:generate-migration --version=2.5.0 --description="Added user authentication system"
 
-# Generate update migration
-php spark db:generate-migration --update --version=1.2.0
+# Generate update migration with custom description
+php spark db:generate-migration --update --minor --description="Added email verification feature"
 ```
 
 ### Regenerate Current Version
@@ -83,6 +83,9 @@ When your database schema changes but you want to keep the same version:
 ```bash
 # Regenerate all tables for current version
 php spark db:generate-migration --regenerate
+
+# Regenerate with custom description
+php spark db:generate-migration --regenerate --description="Updated user table structure"
 
 # Regenerate specific table
 php spark db:generate-migration --regenerate --table=users
@@ -97,8 +100,8 @@ php spark db:generate-migration --regenerate --force
 # Show current version information
 php spark db:migration-version show
 
-# Set version manually
-php spark db:migration-version set --version=3.0.0
+# Set version manually with description
+php spark db:migration-version set --version=3.0.0 --description="Major refactor with breaking changes"
 
 # View version history
 php spark db:migration-version history
@@ -128,13 +131,14 @@ php spark db:migration-status
 | `--patch` | Increment patch version (bug fixes) |
 | `--regenerate` | Regenerate current version (overwrites existing) |
 | `--force` | Force overwrite existing migration files |
+| `--description` | Add custom description for this migration version |
 
 ### `db:migration-version`
 
 | Action | Description |
 |--------|-------------|
 | `show` | Display current version information |
-| `set --version=X.Y.Z` | Manually set version |
+| `set --version=X.Y.Z --description="desc"` | Manually set version with description |
 | `history` | Show complete version history |
 | `list` | List all migration files by version |
 
@@ -165,7 +169,7 @@ Example content:
 {
     "current_version": "1.2.0",
     "last_updated": "2024-08-10 15:30:00",
-    "description": "Added user roles and permissions",
+    "description": "Added user roles and permissions system",
     "history": [
         {
             "version": "1.1.0",
@@ -261,8 +265,8 @@ php spark migrate
 
 ```bash
 # 1. Make database changes manually
-# 2. Generate update migration
-php spark db:generate-migration --minor --update
+# 2. Generate update migration with description
+php spark db:generate-migration --minor --description="Added user profile fields and preferences"
 
 # 3. Check what was generated
 php spark db:migration-version list
@@ -275,8 +279,8 @@ php spark migrate
 
 ```bash
 # 1. Modify database schema
-# 2. Regenerate current version
-php spark db:generate-migration --regenerate
+# 2. Regenerate current version with description
+php spark db:generate-migration --regenerate --description="Fixed column types and added indexes"
 
 # 3. Reset and re-run migrations
 php spark migrate:reset
