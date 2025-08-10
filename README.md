@@ -29,6 +29,7 @@ composer require swiftdev-org/migration-tool
 
 ```
 app/ThirdParty/Swift/Migration/
+├── LICENSE
 ├── README.md
 └── src/
     └── Commands/
