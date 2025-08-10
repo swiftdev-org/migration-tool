@@ -15,18 +15,41 @@ A comprehensive set of Spark commands for generating and managing database migra
 
 ## Installation
 
+### Composer Install (coming soon)
+
 1. Copy the command files to your CodeIgniter 4 application:
 
 ```
-app/Commands/
-├── GenerateMigration.php
-├── MigrationVersion.php
-└── MigrationStatus.php
+composer require swiftdev-org/migration-tool
 ```
 
-2. Ensure your `app/Database/Migrations/` directory exists and is writable
+### Manual Install
 
-3. The commands will be automatically available via Spark CLI
+1. Extract the files to your CodeIgniter 4 application:
+
+```
+app/ThirdParty/Swift/Migration/
+├── README.md
+└── src/
+    └── Commands/
+        ├── GenerateMigration.php
+        ├── MigrationVersion.php
+        └── MigrationStatus.php
+```
+
+2. Update `app/Config/Autoload.php` to load the migration tool
+
+```
+    public $psr4 = [
+        APP_NAMESPACE     => APPPATH, // For custom app namespace
+        'Config'          => APPPATH . 'Config',
+        'Swift\Migration' => APPPATH . 'ThirdParty/Swift/Migration/src',
+    ];
+```
+
+3. Ensure your `app/Database/Migrations/` directory exists and is writable
+
+4. The commands will be automatically available via Spark CLI
 
 ## Commands Overview
 
