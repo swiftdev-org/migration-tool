@@ -799,14 +799,14 @@ PHP;
     {
         $query = $this->db->query("
             SELECT
-                CONSTRAINT_NAME as name,
-                COLUMN_NAME as column,
-                REFERENCED_TABLE_NAME as referenced_table,
-                REFERENCED_COLUMN_NAME as referenced_column
-            FROM information_schema.KEY_COLUMN_USAGE
-            WHERE TABLE_SCHEMA = DATABASE()
-                AND TABLE_NAME = '{$tableName}'
-                AND REFERENCED_TABLE_NAME IS NOT NULL
+                `CONSTRAINT_NAME` as `name`,
+                `COLUMN_NAME` as `column`,
+                `REFERENCED_TABLE_NAME` as `referenced_table`,
+                `REFERENCED_COLUMN_NAME` as `referenced_column`
+            FROM `information_schema`.`KEY_COLUMN_USAGE`
+            WHERE `TABLE_SCHEMA` = DATABASE()
+                AND `TABLE_NAME` = '{$tableName}'
+                AND `REFERENCED_TABLE_NAME` IS NOT NULL
         ");
 
         return $query->getResultArray();
